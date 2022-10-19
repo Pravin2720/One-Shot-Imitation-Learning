@@ -9,7 +9,7 @@ class BlockStackEnv(Env):
         self.actions = ['up', 'right', 'down', 'left', 'open', 'close', 'grasp', 'pickup', 'drop']
         self.action_space = spaces.Discrete(9)
 
-        self.actions_post_dict = {up: [-1, 0], down: [1, 0], right: [0, -1], left: [0, 1], open: []}
+        self.actions_pos_dict = {up:[-1,0], down:[1,0], right:[0,-1], left:[0,1], begin:[0,0]}
 
         # Observation Space
         self.obs_space = [3, 3, 3]
@@ -29,7 +29,6 @@ class BlockStackEnv(Env):
         print("taking step")
         action = self.actions
 
-        next_state =
 
 
 blockstack = BlockStackEnv()
