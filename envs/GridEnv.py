@@ -19,7 +19,7 @@ class GridEnv(gym.Env):
         self.final_block_states = [[4,0],[4,1],[4,2]]
         # action space
         self.actions = ['up', 'down', 'right', 'left']
-        self.actions_pos_dict = {'up': [0, -1], 'down': [0, 1], 'right': [1, 0], 'left': [-1, 0], 'begin': [0, 0]}
+        self.actions_pos_dict = {'up': [-1, 0], 'down': [1, 0], 'right': [0, 1], 'left': [0, -1]}
         self.action_space = Discrete(4)
         # construct the grid
         file_path = os.path.dirname(os.path.realpath(__file__))
@@ -113,8 +113,11 @@ episodes = 1
 for episode in range(1, episodes + 1):
     state = env.agent_state
     done = False
+    print(state)
     for i in range(10):
         # env.render()
         action = env.action_space.sample()
         n_state, reward, done, info = env.step(action)
+        print(env.actions[action])
+        print(n_state)
 
