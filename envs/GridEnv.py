@@ -18,9 +18,9 @@ class GridEnv(gym.Env):
         # blocks order
         self.final_block_states = [[4,0],[4,1],[4,2]]
         # action space
-        self.actions = ['up', 'down', 'right', 'left', 'begin']
+        self.actions = ['up', 'down', 'right', 'left']
         self.actions_pos_dict = {'up': [0, -1], 'down': [0, 1], 'right': [1, 0], 'left': [-1, 0], 'begin': [0, 0]}
-        self.action_space = Discrete(5)
+        self.action_space = Discrete(4)
         # construct the grid
         file_path = os.path.dirname(os.path.realpath(__file__))
         self.insert_grid_map = os.path.join(file_path, 'map3.txt')
@@ -87,7 +87,6 @@ class GridEnv(gym.Env):
 
 
     def step(self, action):
-        print("step")
         curr_state = np.sum([self.agent_state, self.actions_pos_dict[self.actions[action]]], axis=0)
 
         if curr_state[0] < 0 or curr_state[0] > self.grid_shape[0] or curr_state[1] < 0 or curr_state[1] > self.grid_shape[1]:
@@ -96,12 +95,10 @@ class GridEnv(gym.Env):
         self.agent_state = curr_state
 
         done = True
-        for block in self.block_states:
-            print(block[0])
-            print(self.final_block_states[0])
-            # if block[0] != self.final_block_states[0] or block[1] != self.final_block_states[1]:
-            #     done = False
-            #     break
+        for index, block in enumerate(self.block_states):
+            if block[0] != self.final_block_states[index][0] or block[1] != self.final_block_states[index][1]:
+                done = False
+                break
         info = {}
         return self.agent_state, 0, done, info
 
@@ -116,10 +113,8 @@ episodes = 1
 for episode in range(1, episodes + 1):
     state = env.agent_state
     done = False
-
     for i in range(10):
         # env.render()
         action = env.action_space.sample()
         n_state, reward, done, info = env.step(action)
-        print(n_state, reward, done, info)
 
