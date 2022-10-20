@@ -5,12 +5,18 @@ import copy
 import sys
 import pygame
 from gym.spaces import Discrete
+import time
 
 
 BLACK = (0, 0, 0)
 YELLOW = (250, 250, 0)
-WINDOW_HEIGHT = 300
-WINDOW_WIDTH = 300
+RED= (255,0, 0)
+BLUE= (0,0,255)
+GRAY= (128,128,128)
+PINK= (255,105,180)
+colors=[RED, BLUE, PINK]
+WINDOW_HEIGHT = 400
+WINDOW_WIDTH = 400
 
 
 class GridEnv(gym.Env):
@@ -38,6 +44,7 @@ class GridEnv(gym.Env):
 
         # env parameters
         self.reset()
+        self.render()
 
     def read_grid_map(self, insert_grid_map):
         with open(insert_grid_map, 'r') as f:
@@ -61,35 +68,52 @@ class GridEnv(gym.Env):
         return [block_state1, block_state2, block_state3]
 
     def render(self):
-        SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        SCREEN.fill(BLACK)
+        self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.SCREEN.fill(BLACK)
+        self.drawGrid()
+        self.update()
 
-        def drawGrid():
-            height = self.grid_shape[0]
-            width = self.grid_shape[1]
-            block_size = WINDOW_HEIGHT//height
-            # blockSize = 100  # Set the size of the grid block
-            for x in range(0, WINDOW_HEIGHT, block_size):
-                    for y in range(0, WINDOW_WIDTH, block_size):
-                        rect = pygame.Rect(x , y , block_size, block_size)
-                        pygame.draw.rect(SCREEN, YELLOW, rect, 1)
+    def drawGrid(self):
+        height = self.grid_shape[0]
+        width = self.grid_shape[1]
+        block_size = WINDOW_HEIGHT//height
+        # blockSize = 100  # Set the size of the grid block
+        for x in range(0, WINDOW_HEIGHT, block_size):
+                for y in range(0, WINDOW_WIDTH, block_size):
+                    if self.agent_state[0] * 100 == x and self.agent_state[1] * 100 == y:
+                        rect = pygame.Rect(self.agent_state[0] * 100, self.agent_state[1] * 100, block_size,
+                                           block_size)
+                        pygame.draw.rect(self.SCREEN, YELLOW, rect, 1)
+                    else:
+                        rect = pygame.Rect(x, y, block_size, block_size)
+                        pygame.draw.rect(self.SCREEN, BLACK, rect, 1)
+        blocks = self.get_block_states()
+        for i in range(len(blocks)) :
+            x = blocks[i][0]*100
+            y = blocks[i][1]*100
+            # print(x,y)
+            rect = pygame.Rect(x, y, block_size, block_size)
+            pygame.draw.rect(self.SCREEN, colors[i], rect)
 
 
-        while True:
-            drawGrid()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+    def update(self):
+        self.drawGrid()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-            pygame.display.update()
+        pygame.display.update()
+        # while True:
+        #     drawGrid()
+
 
 
 
     def step(self, action):
         curr_state = np.sum([self.agent_state, self.actions_pos_dict[self.actions[action]]], axis=0)
 
-        if curr_state[0] < 0 or curr_state[0] > self.grid_shape[0] or curr_state[1] < 0 or curr_state[1] > self.grid_shape[1]:
+        if curr_state[0] < 0 or curr_state[0] > self.grid_shape[0] - 1 or curr_state[1] < 0 or curr_state[1] > self.grid_shape[1] - 1:
             return self.agent_state, 0, False, {}
 
         self.agent_state = curr_state
@@ -107,6 +131,7 @@ class GridEnv(gym.Env):
         self.current_map = copy.deepcopy(self.initial_map)
 
 env=GridEnv()
+env.render()
 episodes = 1
 
 
@@ -115,9 +140,11 @@ for episode in range(1, episodes + 1):
     done = False
     print(state)
     for i in range(10):
+        time.sleep(1)
         # env.render()
         action = env.action_space.sample()
         n_state, reward, done, info = env.step(action)
+        env.render()
         print(env.actions[action])
         print(n_state)
 
