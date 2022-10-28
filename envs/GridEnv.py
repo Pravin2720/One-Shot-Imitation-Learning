@@ -294,37 +294,46 @@ def prepare_data(t, test):
         y_data.append(eg_y)
     x_data = np.array(x_data)
     y_data = np.array(y_data)
+    new_y_data = []
+    for data in y_data:
+        new_data = np.zeros((len(data), 5))
+        new_data[np.arange(len(data)), data] = 1
+        new_y_data.append(new_data)
+    y_data = np.array(new_y_data, dtype="object")
     seq_len = np.array(seq_len)
     return x_data, y_data, seq_len
 
 
-num_samp = 1
+num_samp = 100
 batch_size = 32
 #
 
-old_training_data = list(np.load('data_1.npy',allow_pickle=True))
-
-train = get_training_data(num_samp)
-train = train + old_training_data
-print(len(train))
+# old_training_data = list(np.load('data_1.npy',allow_pickle=True))
+# train = get_training_data(num_samp)
+# train = train + old_training_data
+# print(len(train))
 # for i in range(1999):
 #     train.append(train[0])
-np.save('data_1.npy', np.array(train, dtype=object), True)
-exit()
+# np.save('data_1.npy', np.array(train, dtype=object), True)
+
+
+# train = get_training_data(1)
+# np.save('data_2.npy', np.array(train, dtype=object), True)
+# exit()
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 tf.reset_default_graph()
-num_hidden = 32
-num_hidden1 = 24
+num_hidden = 100
+num_hidden1 = 100
 
 state_size = 4
 x = tf.placeholder('float32', [None, max_seqlen, state_size], name='X')
-y = tf.placeholder('float32', [None, 1], name='Y')
+y = tf.placeholder('int32', [None, 5], name='Y')
 
 W1 = tf.Variable(tf.random_normal([num_hidden + state_size, num_hidden1]))
 b1 = tf.Variable(tf.random_normal([num_hidden1]))
-W2 = tf.Variable(tf.random_normal([num_hidden1, 1]))
-b2 = tf.Variable(tf.random_normal([1]))
+W2 = tf.Variable(tf.random_normal([num_hidden1, 5]))
+b2 = tf.Variable(tf.random_normal([5]))
 
 seqlen = tf.placeholder('int32', [None], name='Seq_len')
 size = tf.placeholder('int32', [1])
@@ -360,7 +369,8 @@ def predict_action(x, embedding, seqlen):
     return action
 
 action = predict_action(x, op, seqlen)
-loss = tf.losses.mean_squared_error(y, action)
+# loss = tf.losses.mean_squared_error(y, action)
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=action, labels=y))
 optimizer = tf.train.AdamOptimizer().minimize(loss)
 
 sess = tf.InteractiveSession()
@@ -369,26 +379,35 @@ sess.run(tf.global_variables_initializer())
 train = list(np.load('data_1.npy',allow_pickle=True))
 x_data, y_data, seq_len = prepare_data(train, 0)
 
+
 x_d, y_d, y_r, seq_l = None, None, None, None
-for m in range(10):
+for m in range(100):
     epoch_loss = 0
     for k in range(int(num_samp / batch_size)):
         # print(k)
         ind = np.random.randint(0, x_data.shape[0], batch_size)
         x_d, y_d, seq_l = x_data[ind], y_data[ind], seq_len[ind]
-        y_r = y_d.ravel().reshape(-1,1)
-        _, cost_i = sess.run([optimizer, loss], feed_dict = { x: x_d,y: y_r, seqlen: seq_l})
+
+        y_r = []
+        for l in y_d:
+            for i in l:
+                y_r.append(i.tolist())
+        _, cost_i = sess.run([optimizer, loss], feed_dict={x: x_d, y: y_r, seqlen: seq_l})
         epoch_loss += cost_i
-        # sess.run(optimizer, feed_dict={x: x_d, y: y_r, seqlen: seq_l})
+    # print('Epoch', epoch, 'completed out of ', hm_epochs, 'loss:', epoch_loss)
+    #     sess.run(optimizer, feed_dict={x: x_d, y: y_r, seqlen: seq_l})
     print('epoch number ' + str(m))
     # print(sess.run(loss, feed_dict={x: x_d, y: y_r, seqlen: seq_l}))
-    print('Epoch', epoch_loss)
+    print('Loss', epoch_loss)
 
 # After training, let us test on new samples
-test = list(np.load('data_1.npy',allow_pickle=True))
+test = list(np.load('data_2.npy',allow_pickle=True))
 x_test, y_test, seq_test = prepare_data([test[0]], 1)
-y_test = y_test.ravel().reshape(-1, 1)
-actions = (sess.run(action, feed_dict={x: x_test, y: y_test, seqlen: seq_test}))
+y_r = []
+for l in y_test:
+    for i in l:
+        y_r.append(i.tolist())
+actions = (sess.run(action, feed_dict={x: x_test, y: y_r, seqlen: seq_test}))
 print(actions)
 # for i in range(10):
 #     test = get_training_data(num_samples=1)
