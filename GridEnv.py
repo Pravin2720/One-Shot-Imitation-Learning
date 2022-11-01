@@ -3,18 +3,17 @@ import gym
 import pygame
 import sys
 import random
-import time
+from gym.spaces import Discrete
 
 BLACK = (0, 0, 0)
 YELLOW = (250, 250, 0)
 RED= (255,0, 0)
 BLUE= (0,0,255)
 PINK= (255,105,180)
-# colors=[BLACK, RED, BLUE, PINK, YELLOW]
 colors=[BLACK, RED, YELLOW, BLUE, PINK]
 
-WINDOW_HEIGHT = 1000
-WINDOW_WIDTH = 1500
+WINDOW_HEIGHT = 500
+WINDOW_WIDTH = 750
 
 # move(blocktype, blockid, x,y)
 
@@ -39,6 +38,12 @@ class GridEnv(gym.Env):
         self.block_ids_grid = np.zeros((10,15),dtype=int) # [[0] * self.grid_shape[1]] * self.grid_shape[0]
         self.generate_positions()
 
+        # Action Space
+        self.grid_type_action = Discrete(5)
+        self.grid_id_action = Discrete(27)
+        self.grid_x_action = Discrete(10)
+        self.grid_y_action = Discrete(5)
+
         self.print_block_ids()
 
         self.render()
@@ -50,6 +55,33 @@ class GridEnv(gym.Env):
         self.SCREEN.fill(BLACK)
         self.drawGrid()
         self.update()
+
+    def step(self, action):
+        # action will have grid_type, grid_id, target_x, target_y
+        block_type, block_id, t_x, t_y = action
+
+        if t_y < 10 or t_y > 14 or t_x > 9 or self.block_types_grid[t_x][t_y] != 0:
+            print("Please provide valid target position")
+            return 0, 0, False, {}
+        # get grid's current position
+        pos = None
+        for x, r in enumerate(self.block_types_grid):
+            for y, c in enumerate(r):
+                if c == block_type and self.block_ids_grid[x][y] == block_id:
+                    pos = [x, y]
+                    break
+            if pos:
+                break
+        if not pos:
+            print("Block with type", self.block_types_inv[block_type], "and id", block_id, "not found")
+            return 0, 0, False, 0
+        self.block_ids_grid[x][y] = 0
+        self.block_types_grid[x][y] = 0
+        self.block_types_grid[t_x][t_y] = block_type
+        self.block_ids_grid[t_x][t_y] = block_id
+        return 0, 0, False, {}
+
+
 
     def drawGrid(self):
         height = self.grid_shape[0]
@@ -130,13 +162,3 @@ class GridEnv(gym.Env):
         print("blue", sorted(bluen))
         print("pink", sorted(pinkn))
 
-
-env = GridEnv()
-env.drawGrid()
-
-done = False
-while not done:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        env.update()
