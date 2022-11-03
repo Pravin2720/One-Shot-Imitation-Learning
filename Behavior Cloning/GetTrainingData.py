@@ -38,5 +38,5 @@ def get_expert_trajectory():
 
 train = get_training_data(100)
 train = train
-print(len(train))
+# print(len(train))
 # np.save('new_data.npy', np.array(train, dtype=object), True)

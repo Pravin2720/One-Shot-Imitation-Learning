@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-train = list(np.load('new_data.npy',allow_pickle=True))
+train = list(np.load('../new_data.npy', allow_pickle=True))
 
 max_seq_len = 10
 
@@ -42,7 +42,9 @@ def prepare_data(data):
                 # seq_input_type_grid.append(np.hstack([block_type, block_id]).flatten())
                 seq_output_type.append(o_type_labels)
             else:
-                seq_input_type_grid.append(np.zeros(100))
+                block_type = np.array(seq[seq_len[-1]-1][0])[:, :10]
+                seq_input_type_grid.append(block_type.flatten())
+                # seq_input_type_grid.append(np.zeros(100))
                 seq_output_type.append(np.zeros(4))
         type_i.append(seq_input_type_grid)
         type_o.append(seq_output_type)
@@ -51,7 +53,8 @@ def prepare_data(data):
 model = keras.models.Sequential()
 def train_model(data,labels):
     model.add(keras.Input(shape=(10, 100)))
-    model.add(layers.SimpleRNN(128, return_sequences=True, activation='relu'))
+    model.add(layers.SimpleRNN(100, return_sequences=True, activation='relu'))
+    model.add(layers.SimpleRNN(30, return_sequences=True, activation='relu'))
     model.add(layers.Dense(4))
     model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
     model.fit(data, labels, epochs=10)
