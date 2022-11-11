@@ -6,7 +6,7 @@ import pygame
 def get_training_data(num_samples=100):
     samples = []
     for m in range(num_samples):
-        time.sleep(1)
+        # time.sleep(1)
         samples.append(get_expert_trajectory())
     return samples
 
@@ -20,7 +20,7 @@ def get_expert_trajectory():
     block_type = 1
     block_id = 1
     while not done:
-        time.sleep(1)
+        # time.sleep(1)
         if block_id <= rn and pos[0] >= 0:
             env.step([block_type,block_id,pos[0], pos[1]])
             trajectory.append([env.block_types_grid, env.block_ids_grid, block_type, block_id, pos[0], pos[1]])
