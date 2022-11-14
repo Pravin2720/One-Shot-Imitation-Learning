@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import time
 from GridEnv import GridEnv
@@ -23,7 +25,8 @@ def get_expert_trajectory():
         # time.sleep(1)
         if block_id <= rn and pos[0] >= 0:
             env.step([block_type,block_id,pos[0], pos[1]])
-            trajectory.append([env.block_types_grid, env.block_ids_grid, block_type, block_id, pos[0], pos[1]])
+            state = copy.deepcopy([env.block_types_grid, env.block_ids_grid, block_type, block_id, pos[0], pos[1]])
+            trajectory.append(state)
             block_id += 1
             pos[0] -= 1
         else:
