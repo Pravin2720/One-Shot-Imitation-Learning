@@ -1,6 +1,7 @@
 import numpy as np
-# import tensorflow as tf
-# from tensorflow import keras
+import tensorflow as tf
+from tensorflow import keras
+import matplotlib.pyplot as plt
 
 def prepare_data(data):
     blocks = []
@@ -21,34 +22,34 @@ def prepare_data(data):
                 raw_labels_id.append(seq[idx][3])
                 raw_labels_x.append(seq[idx][4])
                 raw_labels_y.append(seq[idx][5])
-    raw_labels_type = np.array(raw_labels_type, dtype=int)
-    labels_type = np.zeros((raw_labels_type.size, 4), dtype=int)
-    labels_type[np.arange(raw_labels_type.size), raw_labels_type] = 1
-
-    raw_labels_id = np.array(raw_labels_id, dtype=int)
-    labels_id = np.zeros((raw_labels_id.size, 27), dtype=int)
-    labels_id[np.arange(raw_labels_id.size), raw_labels_id] = 1
-
-    raw_labels_x = np.array(raw_labels_x, dtype=int)
-    labels_x = np.zeros((raw_labels_x.size, 10), dtype=int)
-    labels_x[np.arange(raw_labels_x.size), raw_labels_x] = 1
-
-    raw_labels_y = np.array(raw_labels_y, dtype=int)
-    labels_y = np.zeros((raw_labels_y.size, 15), dtype=int)
-    labels_y[np.arange(raw_labels_y.size), raw_labels_y] = 1
-
-    labels = np.concatenate((labels_type, labels_id, labels_x, labels_y), axis=1)
+                
+    labels = np.vstack((raw_labels_type, raw_labels_id, raw_labels_x, raw_labels_y)).transpose()
     return np.array(blocks), labels
 
 train = list(np.load('train_data.npy', allow_pickle=True))
-data, labels = prepare_data([train[0]])
+data,labels  = prepare_data(train)
 
-#
-# model = keras.Sequential([
-#     keras.layers.Dense(512, activation='relu'),
-#     keras.layers.Dense(256, activation='relu'),
-#     keras.layers.Dense(128, activation='relu'),
-#     keras.layers.Dense(56, activation='softmax'),
-# ])
-# model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-# model.fit(data, labels, epochs=20)
+model = keras.Sequential([
+    
+    keras.layers.Dense(1024, activation='relu'), 
+    keras.layers.Dropout(0.2),
+    keras.layers.Dense(512, activation='relu'),
+    keras.layers.Dropout(0.2),
+    keras.layers.Dense(256, activation='relu'),
+    keras.layers.Dropout(0.2),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dropout(0.2),
+    keras.layers.Dense(4, activation='relu'),
+])
+
+
+optimizer = keras.optimizers.Adam(learning_rate=0.001)
+model.compile(optimizer=optimizer, loss='mean_squared_error',metrics=['accuracy'])
+
+history = model.fit(data, labels, epochs=20)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['loss'])
+plt.show()
+
+
+model.save('final_model')

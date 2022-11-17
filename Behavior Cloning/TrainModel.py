@@ -40,8 +40,9 @@ def prepare_data(data):
     return np.array(blocks), labels_type, labels_id, labels_x, labels_y
 
 train = list(np.load('train_data.npy', allow_pickle=True))
-data, type_labels, id_labels, x_labels, y_labels = prepare_data(train)
-
+data, type_labels, id_labels, x_labels, y_labels = prepare_data([train[0]])
+print("================",type_labels)
+exit()
 
 # Training model
 type_model = keras.Sequential([
@@ -51,7 +52,7 @@ type_model = keras.Sequential([
     keras.layers.Dense(4, activation='softmax'),
 ])
 type_model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-type_model.fit(data, type_labels, epochs=2)
+type_model.fit(data, type_labels, epochs=5)
 
 id_model = keras.Sequential([
     keras.layers.Dense(512, activation='relu'),
@@ -60,7 +61,7 @@ id_model = keras.Sequential([
     keras.layers.Dense(27, activation='softmax'),
 ])
 id_model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-id_model.fit(data, id_labels, epochs=5)
+id_model.fit(data, id_labels, epochs=20)
 
 x_model = keras.Sequential([
     keras.layers.Dense(512, activation='relu'),
@@ -69,7 +70,7 @@ x_model = keras.Sequential([
     keras.layers.Dense(10, activation='softmax'),
 ])
 x_model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-x_model.fit(data, x_labels, epochs=3)
+x_model.fit(data, x_labels, epochs=10)
 
 y_model = keras.Sequential([
     keras.layers.Dense(512, activation='relu'),
@@ -78,7 +79,7 @@ y_model = keras.Sequential([
     keras.layers.Dense(15, activation='softmax'),
 ])
 y_model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-y_model.fit(data, y_labels, epochs=2)
+y_model.fit(data, y_labels, epochs=5)
 
 
 # Testing model
