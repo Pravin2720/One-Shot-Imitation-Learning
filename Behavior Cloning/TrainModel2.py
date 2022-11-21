@@ -95,9 +95,9 @@ model1.compile(optimizer=optimizer, loss='categorical_crossentropy',metrics=['ac
 
 
 history = model1.fit(pred_data, id_labels, epochs=250)
-# plt.plot(history.history['accuracy'])
-# plt.plot(history.history['loss'])
-# plt.show()
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['loss'])
+plt.show()
 
 # pred_id = model1.predict(pred_data)
 

@@ -35,7 +35,7 @@ def prepare_data(data):
                 blocks.append(np.array(blocks_temp))
     return np.array(blocks)
 
-model = keras.models.load_model('final_model')
+model = keras.models.load_model('square_final_model')
 
 
 # train = list(np.load('train_data.npy', allow_pickle=True))
@@ -47,7 +47,7 @@ model = keras.models.load_model('final_model')
         
 # exit()
 env = GridEnv()
-block_type = 2
+block_type = 1
 shape_type = 0  # 0 for tower and 1 for square
 block_num_dict = {
     1: env.red_num,
@@ -56,8 +56,11 @@ block_num_dict = {
     4: env.pink_num
 }
 block_num = block_num_dict[block_type]
+side_length = math.floor(math.sqrt(block_num))
+print(block_num, side_length)
+total_required_num = side_length * side_length
 done = False
-
+curr_num = 1
 
 block_ids = [i for i in range(1,block_num+1)]
 pred_id = 0
@@ -68,7 +71,7 @@ test_data =[]
 # time.sleep(5)
 while not done:
     time.sleep(1)
-    if len(block_ids) > 0 and pred_x > 0:
+    if curr_num <= total_required_num:
         test_data = get_training_data(block_type, env.block_types_grid, env.block_ids_grid, 0, 1, test_data)
         data = prepare_data(test_data)
         pred = model.predict(data)
@@ -76,10 +79,10 @@ while not done:
         pred_type = round(pred[0])
         pred_id = round(pred[1])
         pred_x = round(pred[2])
-        pred_y=round(pred[3])
+        pred_y = round(pred[3])
+        curr_num += 1
         print(pred_type, pred_id, pred_x,pred_y)
         env.step([pred_type, pred_id, pred_x, pred_y])
-        block_ids.remove(pred_id)
     else:
         done = True
     for event in pygame.event.get():

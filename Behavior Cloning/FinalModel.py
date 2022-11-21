@@ -26,11 +26,10 @@ def prepare_data(data):
     labels = np.vstack((raw_labels_type, raw_labels_id, raw_labels_x, raw_labels_y)).transpose()
     return np.array(blocks), labels
 
-train = list(np.load('train_data.npy', allow_pickle=True))
-data,labels  = prepare_data(train)
+train = list(np.load('square_train_data.npy', allow_pickle=True))
+data,labels = prepare_data(train)
 
 model = keras.Sequential([
-    
     keras.layers.Dense(1024, activation='relu'), 
     keras.layers.Dropout(0.2),
     keras.layers.Dense(512, activation='relu'),
@@ -46,10 +45,10 @@ model = keras.Sequential([
 optimizer = keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=optimizer, loss='mean_squared_error',metrics=['accuracy'])
 
-history = model.fit(data, labels, epochs=20)
+history = model.fit(data, labels, epochs=5)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['loss'])
 plt.show()
 
 
-model.save('final_model')
+model.save('square_final_model')

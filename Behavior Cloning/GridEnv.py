@@ -44,7 +44,7 @@ class GridEnv(gym.Env):
         self.grid_x_action = Discrete(10)
         self.grid_y_action = Discrete(5)
 
-        self.print_block_ids()
+        # self.print_block_ids()
 
         self.render()
 

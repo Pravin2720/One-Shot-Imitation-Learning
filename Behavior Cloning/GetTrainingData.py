@@ -28,18 +28,20 @@ def get_expert_trajectory(block_type):
     block_num = block_num_dict[block_type]
     done = False
     pos = [9,11]
-    block_ids = [i for i in range(1,block_num+1)]
-    random.shuffle(block_ids)
-    block_id = block_ids.pop()
+    # block_ids = [i for i in range(1,block_num+1)]
+    # random.shuffle(block_ids)
+    # block_id = block_ids.pop()
+    block_id = 1
 
 
     while not done:
         # time.sleep(1)
-        if len(block_ids) > 0 and pos[0] >= 0:
+        if block_id <= block_num and pos[0] >= 0:
             state = copy.deepcopy([env.block_types_grid, env.block_ids_grid, block_type, block_id, pos[0], pos[1], [block_type, shape_type]])
             trajectory.append(state)
             env.step([block_type,block_id,pos[0], pos[1]])
-            block_id = block_ids.pop()
+            # block_id = block_ids.pop()
+            block_id += 1
             pos[0] -= 1
             # state = copy.deepcopy([env.block_types_grid, env.block_ids_grid, block_type, block_id, pos[0], pos[1], [block_type, shape_type]])
             # trajectory.append(state)
