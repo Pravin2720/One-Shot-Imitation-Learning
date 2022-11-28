@@ -30,8 +30,8 @@ train = list(np.load('square_train_data.npy', allow_pickle=True))
 data,labels = prepare_data(train)
 
 model = keras.Sequential([
-    keras.layers.Dense(1024, activation='relu'), 
-    keras.layers.Dropout(0.2),
+    # keras.layers.Dense(1024, activation='relu'),
+    # keras.layers.Dropout(0.2),
     keras.layers.Dense(512, activation='relu'),
     keras.layers.Dropout(0.2),
     keras.layers.Dense(256, activation='relu'),
